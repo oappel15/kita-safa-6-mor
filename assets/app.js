@@ -161,6 +161,53 @@ $$(".quiz[data-quiz]").forEach(function(box){
   }
 });
 
+
+/* ---------- print hub (teacher-print.html): pick items by unit, load print/u-NN.txt, print only the selection ---------- */
+function initPrintHub(root){
+  var panel=$("#pr-panel",root); if(!panel) return;
+  var boxes=$$("[data-pr]",root), cache={}, countEl=$("#pr-count",root), msg=$("#pr-msg",root);
+  function sel(){return boxes.filter(function(b){return b.checked;});}
+  function upd(){countEl.textContent=sel().length;}
+  boxes.forEach(function(b){b.addEventListener("change",upd);});
+  $$("[data-pr-all]",root).forEach(function(btn){btn.addEventListener("click",function(){
+    var pre=btn.getAttribute("data-pr-all"), group=boxes.filter(function(b){return b.getAttribute("data-pr").indexOf(pre)===0;});
+    var all=group.every(function(b){return b.checked;}); group.forEach(function(b){b.checked=!all;}); upd();});});
+  $$("[data-pr-unit]",root).forEach(function(btn){btn.addEventListener("click",function(){
+    var n=btn.getAttribute("data-pr-unit"), group=boxes.filter(function(b){return b.getAttribute("data-u")===n;});
+    var all=group.every(function(b){return b.checked;}); group.forEach(function(b){b.checked=!all;}); upd();});});
+  var clr=$("[data-pr-clear]",root); if(clr) clr.addEventListener("click",function(){boxes.forEach(function(b){b.checked=false;});upd();});
+  function load(n){
+    if(cache[n]) return Promise.resolve(cache[n]);
+    return fetch("print/u-"+("0"+n).slice(-2)+".txt",{cache:"no-cache"}).then(function(r){if(!r.ok) throw new Error(r.status);return r.text();}).then(function(t){
+      var tpl=document.createElement("template"); tpl.innerHTML=decodeURIComponent(escape(atob(t.trim()))); cache[n]=tpl.content; return cache[n];});
+  }
+  function render(){
+    var picked=sel(); if(!picked.length){msg.textContent="עוד לא נבחרו פריטים. סמנו לפחות פריט אחד.";return Promise.reject("none");}
+    msg.textContent="מכינים את החומרים להדפסה...";
+    var units=[]; picked.forEach(function(b){var u=b.getAttribute("data-u"); if(units.indexOf(u)<0) units.push(u);});
+    return Promise.all(units.map(load)).then(function(){
+      var old=$("#pr-root"); if(old) old.remove();
+      var pr=document.createElement("div"); pr.id="pr-root";
+      var lay=$('input[name="pr-lay"]:checked',root).value, cards=$('input[name="pr-cards"]:checked',root).value, keys=$("#pr-keys",root).checked;
+      pr.className="lay-"+lay+" cards-"+cards+(keys?"":" no-keys");
+      picked.forEach(function(b){var frag=cache[b.getAttribute("data-u")]; var a=frag&&frag.getElementById(b.getAttribute("data-pr")); if(a) pr.appendChild(a.cloneNode(true));});
+      document.body.appendChild(pr); document.body.classList.add("pr-ready");
+      msg.textContent="מוכן: "+pr.children.length+" פריטים.";
+      return pr;
+    },function(){msg.textContent="לא הצלחנו לטעון את החומרים. בדקו את החיבור לאינטרנט ונסו שוב.";throw "load";});
+  }
+  var bar=$("#pr-bar");
+  if(!bar){bar=document.createElement("div");bar.id="pr-bar";bar.innerHTML='<b>תצוגה מקדימה להדפסה</b><span class="pr-bar-n"></span><button type="button" class="btn small" data-act="print">🖨️ הדפסה</button><button type="button" class="btn small ghost" data-act="close">✕ סגירה</button>';document.body.appendChild(bar);}
+  function closePrev(){document.body.classList.remove("pr-preview","pr-ready");}
+  function doPrint(){document.body.classList.add("pr-ready");var go=function(){window.print();};(document.fonts&&document.fonts.ready?document.fonts.ready.then(go):go());}
+  $('[data-act="close"]',bar).onclick=closePrev; $('[data-act="print"]',bar).onclick=doPrint;
+  document.addEventListener("keydown",function(e){if(e.key==="Escape"&&document.body.classList.contains("pr-preview"))closePrev();});
+  window.addEventListener("afterprint",function(){if(!document.body.classList.contains("pr-preview"))document.body.classList.remove("pr-ready");});
+  $("#pr-preview",root).addEventListener("click",function(){render().then(function(pr){$(".pr-bar-n",bar).textContent=" · "+pr.children.length+" פריטים";document.body.classList.add("pr-preview");pr.scrollTop=0;}).catch(function(){});});
+  $("#pr-print",root).addEventListener("click",function(){render().then(doPrint).catch(function(){});});
+  upd(); window.KitaPrint={render:render,close:closePrev};
+}
+
 /* ---------- teacher gate ---------- */
 var gate=$("#teacher-gate");
 if(gate){
@@ -173,7 +220,7 @@ if(gate){
       var v=te.value.trim(),out=$("#teacher-link");if(!EMAIL.test(v)){out.textContent="נא לכתוב כתובת מייל תקינה.";return;}
       LS.set("kitaSafaTeacher",v);var base=location.href.replace(/teacher\.html.*$/,"");
       out.innerHTML='הקישור לכיתה שלך (המייל ימולא אוטומטית בבחנים):<br><code>'+esc(base+"index.html?t="+encodeURIComponent(v))+'</code>';});}
-    bindPrint(content);
+    bindPrint(content); initPrintHub(content);
     if(location.hash){var tg=document.getElementById(location.hash.slice(1));if(tg)setTimeout(function(){tg.scrollIntoView();},30);}
   };
   $("#teacher-form").addEventListener("submit",function(e){e.preventDefault();if(pw.value.trim()==="1010"){err.hidden=true;unlock();}else{err.hidden=false;pw.value="";pw.focus();}});
