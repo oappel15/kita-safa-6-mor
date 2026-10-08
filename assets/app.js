@@ -174,10 +174,18 @@ if(gate){
       LS.set("kitaSafaTeacher",v);var base=location.href.replace(/teacher\.html.*$/,"");
       out.innerHTML='הקישור לכיתה שלך (המייל ימולא אוטומטית בבחנים):<br><code>'+esc(base+"index.html?t="+encodeURIComponent(v))+'</code>';});}
     bindPrint(content);
+    if(location.hash){var tg=document.getElementById(location.hash.slice(1));if(tg)setTimeout(function(){tg.scrollIntoView();},30);}
   };
   $("#teacher-form").addEventListener("submit",function(e){e.preventDefault();if(pw.value.trim()==="1010"){err.hidden=true;unlock();}else{err.hidden=false;pw.value="";pw.focus();}});
   try{if(sessionStorage.getItem("kitaSafa6TeacherOK")==="1")unlock();}catch(e){}
 }
+
+/* ---------- teacher-only boxes on public pages (same session flag as the teacher gate) ---------- */
+$$("[data-teacher-only]").forEach(function(box){
+  var ok=false;try{ok=sessionStorage.getItem("kitaSafa6TeacherOK")==="1";}catch(e){}
+  var d=$(box.getAttribute("data-teacher-only"));if(!ok||!d)return;
+  try{box.innerHTML=decodeURIComponent(escape(atob(d.textContent.trim())));box.hidden=false;}catch(e){}
+});
 
 /* ---------- games ---------- */
 var gd=$("#games-data");

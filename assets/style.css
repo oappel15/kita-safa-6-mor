@@ -192,6 +192,21 @@ caption{font-family:var(--fh);font-size:1.1rem;text-align:right;padding:4px 0}
 details.key{background:var(--paper);border-radius:10px;padding:4px 10px;margin:4px 0}
 code{direction:ltr;unicode-bidi:embed;word-break:break-all;background:var(--sand);padding:2px 6px;border-radius:6px}
 tr[id]{scroll-margin-top:130px}
+/* teacher area: nav + textbook mapping */
+.tnav{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 10px}
+.tnav a{text-decoration:none;color:var(--ink);background:var(--sand);border:1.5px solid var(--line);border-radius:999px;padding:3px 14px;font-weight:700}
+.tnav a[aria-current]{background:var(--deep);color:#fff;border-color:var(--deep)}
+.books-box{border-color:var(--lilac);background:#FBF8FF}
+.bk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.bk{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:8px 12px}
+.bk h4{margin:.2em 0 .3em;font-size:1.05rem}
+.bk-list{padding-right:18px;margin:.3em 0}.bk-list li{margin:4px 0;font-size:.93rem}
+.bk-st{display:inline-block;font-family:var(--fb);font-size:.75rem;font-weight:700;border-radius:999px;padding:0 9px;vertical-align:middle;border:1.5px solid}
+.bk-ok{background:var(--mint);border-color:#8CC9A3}.bk-partial{background:var(--butter);border-color:#E7CF7E}.bk-none{color:var(--ink2)}
+span.bk-none{background:#EEE9F6;border-color:var(--lilac)}
+.bk-season{margin:.2em 0;font-size:.88rem;color:var(--deep);font-weight:600}
+.books td{min-width:200px}.books .bk-list li{font-size:.88rem}
+@media (max-width:900px){.bk-grid{grid-template-columns:1fr}}
 /* responsive */
 @media (max-width:900px){.route{grid-template-columns:repeat(3,1fr)}.feature-grid{grid-template-columns:1fr 1fr}.levels{grid-template-columns:1fr}.bins.b5,.bins.b4{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:700px){body{font-size:16px}.hero{grid-template-columns:1fr;padding:16px}.hero-art{max-width:220px;margin:0 auto}.two,.unit-meta{grid-template-columns:1fr}
