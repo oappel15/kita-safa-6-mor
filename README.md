@@ -8,3 +8,5 @@
 - הקראה (Web Speech, he-IL), אזור מורים, תפריט שנשאר פתוח
 
 אתר סטטי (HTML/CSS/JS). אין איסוף מידע על תלמידים.
+
+האתר החי: https://kita-safa-6.vercel.app
